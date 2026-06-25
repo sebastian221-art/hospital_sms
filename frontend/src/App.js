@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./routes/PrivateRoute";
 import Unauthorized from "./pages/unauthorized";
 import ForgotPassword from "./pages/ForgotPassword";
+import EnvioMasivoVoz from "./pages/EnvioMasivoVoz";
 import ResetPassword from "./pages/ResetPassword";
 import UploadExcel from "./pages/UploadExcel";
 import DashboardHome from "./pages/DashboardHome";
@@ -55,6 +56,7 @@ const App = () => {
             
             {/* Rutas de WhatsApp y Voz */}
             <Route path="enviar-whatsapp" element={<SendWhatsApp />} />
+            <Route path="envio-voz" element={<EnvioMasivoVoz />} />
             <Route path="enviar-voz" element={<Recordatoriovoz />} />
 
             {/* Ruta de respuestas (si la usas) */}

@@ -165,3 +165,64 @@ exports.getSaldoLabsMobile = async (req, res) => {
         });
     }
 };
+exports.sendMasivoSMS = async (req, res) => {
+    const { mensaje, telefonos } = req.body;
+
+    if (!mensaje || !telefonos || !Array.isArray(telefonos) || telefonos.length === 0) {
+        return res.status(400).json({ success: false, message: "Mensaje y lista de teléfonos son requeridos" });
+    }
+
+    const apiUser = process.env.LABSMOBILE_USER;
+    const apiToken = process.env.LABSMOBILE_API_KEY;
+
+    if (!apiUser || !apiToken) {
+        return res.status(500).json({ success: false, message: "Credenciales de LabsMobile no configuradas" });
+    }
+
+    const clientLabsMobile = new LabsMobileClient(apiUser, apiToken);
+
+    let enviados = 0;
+    let fallidos = 0;
+    let bloqueados = 0;
+    const errores = [];
+
+    // Responde inmediatamente y procesa en background
+    res.json({
+        success: true,
+        message: `Iniciando envío masivo a ${telefonos.length} números...`,
+        total: telefonos.length
+    });
+
+    for (let i = 0; i < telefonos.length; i++) {
+        let telefono = String(telefonos[i]).replace(/\D/g, '');
+        if (!telefono.startsWith('57')) telefono = '57' + telefono.slice(-10);
+
+        if (telefono.length < 11) { fallidos++; continue; }
+
+        try {
+            const estaBloqueado = await Blacklist.estaEnBlacklist(telefono);
+            if (estaBloqueado) { bloqueados++; continue; }
+
+            const bodySms = new LabsMobileModelTextMessage([telefono], mensaje);
+            await clientLabsMobile.sendSms(bodySms);
+            enviados++;
+            console.log(`✅ [${i+1}/${telefonos.length}] SMS enviado a ${telefono}`);
+        } catch (error) {
+            fallidos++;
+            errores.push({ telefono, error: error.message });
+            console.error(`⚠️ Error enviando a ${telefono}:`, error.message);
+        }
+
+        // Rate limit: pausa cada 9 mensajes
+        if ((i + 1) % 9 === 0) {
+            console.log(`⏳ Pausa rate limit... (${enviados} enviados)`);
+            await delay(1000);
+        }
+    }
+
+    console.log(`🚀 Envío masivo completado: ${enviados} enviados, ${fallidos} fallidos, ${bloqueados} bloqueados`);
+
+    if (global.io) {
+        global.io.emit('sms:masivo:completado', { enviados, fallidos, bloqueados, total: telefonos.length });
+    }
+};

@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("./config/cronJobs");
+// require("./config/cronJobs"); // desactivado sin BD
 
 const express = require("express");
 const cors = require("cors");
@@ -7,6 +7,11 @@ const morgan = require("morgan");
 const http = require("http");
 const socketIo = require("socket.io");
 const db = require("./config/db");
+
+// Evita crashes por errores de BD sin manejar
+process.on('unhandledRejection', (err) => {
+    console.warn('⚠️ Error no manejado (ignorado):', err.message);
+});
 
 // Importar rutas
 const authRoutes = require("./routes/auth");
@@ -51,21 +56,20 @@ if (!fs.existsSync(mediaDir)) {
 // Socket.io eventos
 io.on("connection", (socket) => {
     console.log("🔌 Cliente conectado:", socket.id);
-    
     socket.on("disconnect", () => {
         console.log("🔌 Cliente desconectado:", socket.id);
     });
 });
 
-// Verificar conexión DB
-db.getConnection((err, connection) => {
-    if (err) {
-        console.error("Error al conectar con la base de datos:", err);
-    } else {
-        console.log("Conectado a la base de datos MySQL");
+// Verificar conexión DB — no crashea si no hay MySQL
+db.getConnection()
+    .then(connection => {
+        console.log("✅ Conectado a la base de datos MySQL");
         connection.release();
-    }
-});
+    })
+    .catch(err => {
+        console.warn("⚠️ MySQL no disponible — continuando sin BD:", err.message);
+    });
 
 // Rutas
 app.use("/api/auth", authRoutes);
@@ -91,7 +95,7 @@ app.use("/api/envios", historialRoutes);
 const blacklistRoutes = require("./routes/blacklistRoutes");
 app.use("/api/blacklist", blacklistRoutes);
 
-// Webhook de Meta - Ruta directa para compatibilidad
+// Webhook de Meta
 const { verifyWebhook, handleMetaWebhook } = require("./controllers/whatsappController");
 app.get("/webhook", verifyWebhook);
 app.post("/webhook", handleMetaWebhook);
@@ -102,7 +106,7 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ message: err.message || "Error interno del servidor" });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
     console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
     console.log(`🔌 Socket.io listo para conexiones`);

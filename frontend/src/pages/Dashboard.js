@@ -20,7 +20,8 @@ import {
   FaHistory, // ✅ NUEVO ICONO PARA HISTORIAL
   FaComments, // ✅ NUEVO ICONO PARA RESPUESTAS
   FaCommentDots, // ✅ NUEVO ICONO PARA CHATS
-  FaBan, // ✅ NUEVO ICONO PARA LISTA NEGRA
+  FaBan,
+  FaPhone, // ✅ NUEVO ICONO PARA LISTA NEGRA
 } from "react-icons/fa";
 import logo from "../assets/logos-jelcom.png";
 
@@ -266,6 +267,18 @@ const Dashboard = () => {
                   collapsed={isCollapsed}
                   onClick={() => navigate("/dashboard/enviar-voz")}
                 />
+                <SidebarButton
+  icon={<FaPhone />}
+  text="Envío Masivo Voz"
+  collapsed={isCollapsed}
+  onClick={() => navigate("/dashboard/envio-voz-masivo")}
+/>
+<SidebarButton
+  icon={<FaPhone />}
+  text="Envío Masivo Voz"
+  collapsed={false}
+  onClick={() => navigate("/dashboard/envio-voz-masivo")}
+/>
               </div>
             ) : (
               <div className="absolute left-full top-0 bg-gray-800 text-white p-2 rounded-lg shadow-lg w-48 hidden group-hover:block">

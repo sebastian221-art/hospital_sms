@@ -1,21 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const { sendManualSMS, sendReminderSMS, getSaldoLabsMobile } = require("../controllers/sms2controller"); // ✅ Importar correctamente
+const { sendManualSMS, sendReminderSMS, getSaldoLabsMobile, sendMasivoSMS } = require("../controllers/sms2controller");
+const { verificarRol } = require("../middlewares/auth");
 
-router.post("/enviar-sms", sendManualSMS);
-router.post("/enviar", async (req, res) => {
+router.post("/enviar-sms", verificarRol(["admin", "usuario"]), sendManualSMS);
+router.post("/enviar-masivo", verificarRol(["admin", "usuario"]), sendMasivoSMS);
+router.post("/enviar", verificarRol(["admin", "usuario"]), async (req, res) => {
     try {
-        console.log("📢 Recibida petición para enviar recordatorios SMS...");
-        
         const resultado = await sendReminderSMS();
-
         return res.json({ success: true, resultado });
     } catch (error) {
-        console.error("❌ Error en el endpoint /enviar:", error);
-        return res.status(500).json({ success: false, message: "Error al enviar recordatorios", error: error.message });
+        return res.status(500).json({ success: false, message: "Error al enviar", error: error.message });
     }
 });
+
+// Sin verificarRol para el saldo
 router.get("/saldo", getSaldoLabsMobile);
 
 module.exports = router;
-
