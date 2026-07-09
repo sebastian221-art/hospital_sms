@@ -240,7 +240,7 @@ const Dashboard = () => {
               </div>
               {!isCollapsed && (openSections.whatsapp ? <FaChevronUp /> : <FaChevronDown />)}
             </div>
-
+            <SidebarButton icon={<FaWhatsapp />} text="Envío Masivo WhatsApp" collapsed={isCollapsed} onClick={() => navigate("/dashboard/envio-whatsapp-masivo")} />
             {!isCollapsed ? (
               <div className={`pl-6 space-y-1 transition-all duration-300 ${openSections.whatsapp ? "block" : "hidden"}`}>
                 <SidebarButton

@@ -18,6 +18,7 @@ import SendWhatsApp from "./pages/SendWhatsApp";
 import ConfigAdmin from "./pages/ConfigAdmin";
 import ResponsesList from "./pages/ResponsesList";
 import Recordatoriovoz from "./pages/ProgramarRecordatorio";
+import EnvioMasivoWhatsapp from "./pages/EnvioMasivoWhatsapp";
 import HistorialEnvios from "./pages/HistorialEnvios"; // ✅ NUEVO
 import ChatList from "./pages/ChatList"; // ✅ NUEVO - Lista de chats
 import ChatView from "./pages/ChatView"; // ✅ NUEVO - Vista individual del chat
@@ -58,6 +59,7 @@ const App = () => {
             <Route path="enviar-whatsapp" element={<SendWhatsApp />} />
             <Route path="envio-voz" element={<EnvioMasivoVoz />} />
             <Route path="enviar-voz" element={<Recordatoriovoz />} />
+            <Route path="envio-whatsapp-masivo" element={<EnvioMasivoWhatsapp />} />
 
             {/* Ruta de respuestas (si la usas) */}
             <Route path="respuestas" element={<ResponsesList />} />
